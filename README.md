@@ -161,7 +161,7 @@ dist
 
 ## 📜 Lisensi
 
-Proyek ini bersifat open-source. Anda bebas memodifikasi, memperluas, dan mendistribusikannya.
+-
 
 ---
 
@@ -178,3 +178,4 @@ Proyek ini bersifat open-source. Anda bebas memodifikasi, memperluas, dan mendis
 * Pastikan `php artisan migrate` dijalankan pertama kali untuk membuat database.
 * Jalankan Laravel di port `8000` dan React di `5173` agar CORS tetap sesuai.
 * Dokumentasi tambahan tersedia di file `Fullstack-Starterpack-React-Vite-Laravel.md`.
+
