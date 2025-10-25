@@ -1,0 +1,15 @@
+.headintg {
+  font-size: 5rem;
+}
+
+@media (min-width: 768px) {
+  .fs-custom {
+    font-size: 1.75rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .fs-custom {
+    font-size: 2rem;
+  }
+}
