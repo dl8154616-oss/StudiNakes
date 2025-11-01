@@ -12,6 +12,8 @@ import PasswordReset from './pages/authentication/Login/PasswordReset'
 import SetNewPassword from './pages/authentication/Login/SetNewPassword'
 import CheckYourEmail from './pages/authentication/Login/CheckYourEmail'
 
+import CourseTabsDetails from './pages/Course/CourseTabsDetails.jsx'
+
 
 export default function App() {
 return (
@@ -27,6 +29,7 @@ return (
 <Route path="/PasswordReset" element={<PasswordReset />} />
 <Route path="/SetNewPassword" element={<SetNewPassword />} />
 <Route path="/CheckYourEmail" element={<CheckYourEmail />} />
+<Route path="/CourseTabsDetails" element={<CourseTabsDetails />} />
 </Routes>
 </div>
 )
