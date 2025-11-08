@@ -3,9 +3,6 @@ import NavbarBanner from "../../../components/Dashboard/UserDashboard/NavbarBann
 import StatsCards from "../../../components/Dashboard/UserDashboard/StatsCards"
 import EnrolledTrainings from "../../../components/Dashboard/UserDashboard/EnrolledTrainings"
 import SidebarRight from "../../../components/Dashboard/UserDashboard/SidebarRight"
-// import StatsCards from "../components/StatsCards";
-// import EnrolledTrainings from "../components/EnrolledTrainings";
-// import SidebarRight from "../components/SidebarRight";
 
 const Dashboard = () => {
   return (
