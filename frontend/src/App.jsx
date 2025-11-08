@@ -13,7 +13,7 @@ import SetNewPassword from './pages/authentication/Login/SetNewPassword'
 import CheckYourEmail from './pages/authentication/Login/CheckYourEmail'
 
 import CourseTabsDetails from './pages/Course/CourseTabsDetails.jsx'
-
+import UserDashboard from './pages/Dashboard/UserDashboard/LayoutUserDashboard.jsx'
 
 export default function App() {
 return (
@@ -30,6 +30,7 @@ return (
 <Route path="/SetNewPassword" element={<SetNewPassword />} />
 <Route path="/CheckYourEmail" element={<CheckYourEmail />} />
 <Route path="/CourseTabsDetails" element={<CourseTabsDetails />} />
+<Route path='/User-Dashboard' element={<UserDashboard />} />
 </Routes>
 </div>
 )
