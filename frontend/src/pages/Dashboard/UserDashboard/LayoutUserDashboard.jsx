@@ -3,10 +3,13 @@ import NavbarBanner from "../../../components/Dashboard/UserDashboard/NavbarBann
 import StatsCards from "../../../components/Dashboard/UserDashboard/StatsCards"
 import EnrolledTrainings from "../../../components/Dashboard/UserDashboard/EnrolledTrainings"
 import SidebarRight from "../../../components/Dashboard/UserDashboard/SidebarRight"
+import TopNavbar from "../../../components/TopNavbar"
 
 const Dashboard = () => {
   return (
-    <div className="container py-4">
+    <>
+      <TopNavbar/>
+      <div className="container py-4">
       <NavbarBanner />
       <div className="row">
         <div className="col-lg-8">
@@ -18,6 +21,8 @@ const Dashboard = () => {
         </div>
       </div>
     </div>
+    </>
+
   );
 };
 
