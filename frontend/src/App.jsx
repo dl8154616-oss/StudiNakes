@@ -12,7 +12,6 @@ import PasswordReset from './pages/authentication/Login/PasswordReset'
 import SetNewPassword from './pages/authentication/Login/SetNewPassword'
 import CheckYourEmail from './pages/authentication/Login/CheckYourEmail'
 
-
 export default function App() {
 return (
 <div className="">

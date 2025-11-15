@@ -1,12 +1,11 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function PasswordReset() {
   return (
-    // Background wrapper
     <div
-      className="d-flex flex-column justify-content-center align-items-center"
+      className="d-flex flex-column justify-content-center align-items-center min-vh-100"
       style={{
-        minHeight: "100vh",
         backgroundImage: "url('/images/authentication/human-using-laptop.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
@@ -23,59 +22,71 @@ export default function PasswordReset() {
         />
       </div>
 
-      {/* Card container */}
+      {/* Card */}
       <div
-        className="card p-4 d-flex flex-column justify-content-center"
+        className="card p-4 border-0 shadow-sm"
         style={{
-          width: "600px",
+          width: "100%",
+          maxWidth: "600px",
           borderRadius: "10px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-          minHeight: "500px",
           background: "rgba(255,255,255,0.95)",
         }}
       >
-        {/* Title */}
-        <h3
-          className="mb-2"
-          style={{
-            textAlign: "left",
-            marginLeft: "80px",
-            fontFamily: "Poppins",
-            fontWeight: "500",
-          }}
-        >
-          Password Reset
-        </h3>
-
-        <p
-          className="mb-4"
-          style={{
-            textAlign: "left",
-            marginLeft: "80px",
-            fontFamily: "Poppins",
-          }}
-        >
-          Your password has been successfully reset. You can now log in with your
-          new password.
-        </p>
-
-        {/* Sign in button */}
-        <div
-          className="d-grid gap-2"
-          style={{ marginLeft: "80px", marginRight: "80px" }}
-        >
-          <button
-            type="submit"
-            className="btn btn-primary"
+        <div className="px-md-5 px-4">
+          {/* Title */}
+          <h3
+            className="mb-2"
             style={{
               fontFamily: "Poppins",
               fontWeight: "500",
+              textAlign: "left",
+            }}
+          >
+            Password Reset
+          </h3>
+
+          <p
+            className="mb-4"
+            style={{
+              fontFamily: "Poppins",
+              textAlign: "left",
+              color: "#555",
+            }}
+          >
+            Your password has been successfully reset. You can now log in with
+            your new password.
+          </p>
+
+          {/* Confirm Button */}
+          <button
+            type="button"
+            className="btn w-100 text-white fw-medium"
+            style={{
               backgroundColor: "#0A2E56",
               border: "none",
+              fontFamily: "Poppins",
             }}
           >
             Confirm
           </button>
+
+          {/* Back to Login */}
+          <div
+            className="text-center mt-4"
+            style={{ fontFamily: "Poppins", fontSize: "0.95rem" }}
+          >
+            <span>Back to </span>
+            <Link
+              to="/login"
+              style={{
+                color: "#0A2E56",
+                fontWeight: "bold",
+                textDecoration: "none",
+              }}
+            >
+              Log in
+            </Link>
+          </div>
         </div>
       </div>
     </div>
