@@ -4,9 +4,8 @@ import { Link } from "react-router-dom";
 export default function ForgotPassword() {
   return (
     <div
-      className="d-flex flex-column justify-content-center align-items-center"
+      className="d-flex flex-column justify-content-center align-items-center min-vh-100"
       style={{
-        minHeight: "100vh",
         backgroundImage: "url('/images/authentication/human-using-laptop.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
@@ -14,29 +13,27 @@ export default function ForgotPassword() {
         backgroundColor: "#f8f9fa",
       }}
     >
-    
       {/* Logo */}
-      <div className="text-center">
+      <div className="text-center mb-4">
         <img
           src="/images/Logo2.png"
           alt="Logo StudiNakes"
-          style={{ width: '150px', height: 'auto' }}
+          style={{ width: "150px", height: "auto" }}
         />
       </div>
-    
-      {/* Card Container */}
+
+      {/* Card */}
       <div
-        className="card p-4 d-flex flex-column justify-content-center"
+        className="card p-4 border-0 shadow-sm"
         style={{
-          width: "600px",
+          width: "100%",
+          maxWidth: "600px",
           borderRadius: "10px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-          minHeight: "500px",
           background: "rgba(255,255,255,0.95)",
         }}
       >
-        {/* Title */}
-        <div style={{ marginLeft: "80px", marginRight: "80px" }}>
+        <div className="px-md-5 px-4">
+          {/* Title */}
           <h3
             className="mb-2"
             style={{
@@ -52,79 +49,74 @@ export default function ForgotPassword() {
             style={{
               fontFamily: "Poppins",
               textAlign: "left",
+              color: "#555",
             }}
           >
-            Please enter your email to reset your password
+            Please enter your email to reset your password.
           </p>
-        </div>
 
-        {/* Form */}
-        <form>
-          {/* Email Field */}
-          <div
-            className="mb-4"
-            style={{ marginLeft: "80px", marginRight: "80px" }}
-          >
-            <label
-              htmlFor="email"
-              className="form-label"
-              style={{ fontFamily: "Poppins", fontWeight: "500" }}
-            >
-              Email address
-            </label>
-            <input
-              type="email"
-              className="form-control"
-              id="email"
-              placeholder="Enter your email"
-            />
-          </div>
+          {/* Form */}
+          <form>
+            {/* Email Field */}
+            <div className="mb-4">
+              <label
+                htmlFor="email"
+                className="form-label fw-medium"
+                style={{ fontFamily: "Poppins" }}
+              >
+                Email Address
+              </label>
+              <input
+                type="email"
+                className="form-control"
+                id="email"
+                placeholder="Enter your email"
+              />
+            </div>
 
-          {/* Remember Checkbox */}
-          <div
-            className="mb-3 form-check"
-            style={{
-              marginLeft: "80px",
-              marginRight: "80px",
-              fontFamily: "Poppins",
-            }}
-          >
-            <input
-              type="checkbox"
-              className="form-check-input"
-              id="rememberMe"
-            />
-            <label className="form-check-label" htmlFor="rememberMe">
-              Remember for 30 days
-            </label>
-          </div>
+            {/* Remember Checkbox */}
+            <div className="mb-3 form-check" style={{ fontFamily: "Poppins" }}>
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="rememberMe"
+              />
+              <label className="form-check-label" htmlFor="rememberMe">
+                Remember for 30 days
+              </label>
+            </div>
 
-          {/* Reset Button */}
-          <div className="d-grid gap-2" style={{ margin: "0 80px" }}>
+            {/* Reset Button */}
             <button
               type="submit"
-              className="btn btn-primary"
+              className="btn w-100 text-white fw-medium"
               style={{
-                fontFamily: "Poppins",
-                fontWeight: "500",
                 backgroundColor: "#0A2E56",
                 border: "none",
+                fontFamily: "Poppins",
               }}
             >
               Reset Password
             </button>
-          </div>
-        </form>
+          </form>
 
-        {/* Back to login link */}
-        <div className="text-center mt-4" style={{ fontFamily: "Poppins" }}>
-          <span>{''}Remember your password? </span>
-          <Link
-            to="/login"
-            style={{ color: "#0A2E56", fontWeight: "bold", textDecoration: "none" }}
+          {/* Back to Login */}
+          <div
+            className="text-center mt-4"
+            style={{ fontFamily: "Poppins", fontSize: "0.95rem" }}
           >
-            Log in
-          </Link>
+            <span>Remember your password? </span>
+            <Link
+              to="/login"
+              style={{
+                color: "#0A2E56",
+                fontWeight: "bold",
+                textDecoration: "none",
+              }}
+            >
+              Log in
+            </Link>
+          </div>
         </div>
       </div>
     </div>
