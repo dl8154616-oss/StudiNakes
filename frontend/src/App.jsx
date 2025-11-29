@@ -27,6 +27,7 @@ return (
 <Route path="/PasswordReset" element={<PasswordReset />} />
 <Route path="/SetNewPassword" element={<SetNewPassword />} />
 <Route path="/CheckYourEmail" element={<CheckYourEmail />} />
+<Route path="/Footer" element={<Footer/>}/>
 </Routes>
 </div>
 )
