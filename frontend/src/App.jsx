@@ -30,6 +30,7 @@ return (
 <Route path="/PasswordReset" element={<PasswordReset />} />
 <Route path="/SetNewPassword" element={<SetNewPassword />} />
 <Route path="/CheckYourEmail" element={<CheckYourEmail />} />
+<Route path="/Footer" element={<Footer/>}/>
 <Route path="/CourseTabsDetails" element={<CourseTabsDetails />} />
 <Route path='/User-Dashboard' element={<UserDashboard />} />
 <Route path='/User-Profile' element={<UserProfile />} />
