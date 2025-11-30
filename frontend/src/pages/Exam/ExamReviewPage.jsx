@@ -1,8 +1,17 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 
 // --- Configuration and Data ---
-const EXAM_DURATION_SECONDS = 40 * 60 + 5; // 40 minutes and 5 seconds as per image
+const EXAM_DURATION_SECONDS = 0; // Timer should be stopped/at 0 for review
 const QUESTIONS_COUNT = 73;
+
+// Simulated data for Review Mode
+const CORRECT_ANSWERS = {
+  1: "A",
+  2: "B", // Q2 Correct Answer is B
+  3: "A",
+  // Simulate correct answers for up to 60 questions for realistic stats
+  ...Array.from({ length: 32 }, (_, i) => ({ [i + 4]: i % 2 === 0 ? "C" : "D" })).reduce((acc, curr) => ({ ...acc, ...curr }), {}),
+};
 
 // Generate dummy questions data
 const initialQuestions = Array.from({ length: QUESTIONS_COUNT }, (_, i) => ({
@@ -10,23 +19,23 @@ const initialQuestions = Array.from({ length: QUESTIONS_COUNT }, (_, i) => ({
   question:
     "What are the primary constraints in project management, often represented as the 'Triple Constraint'?",
   options: [
-    { id: "A", text: "Scope, Time, and Cost" },
-    { id: "B", text: "Quality, Resources, and Risk" },
-    { id: "C", text: "Stakeholders, Communication, and Budget" },
-    { id: "D", text: "Team size, Software, and Hardware" },
+    { id: "A", text: "To list all potential project team members" },
+    { id: "B", text: "To list all potential project team members" },
+    { id: "C", text: "To list all potential project team members" },
+    { id: "D", text: "To list all potential project team members" },
   ],
-  // Simulate an answer for Q1
-  selectedAnswer: i === 0 ? "C" : null,
 }));
 
-// Simulate initial answers and bookmarks for a realistic visual state
+// Simulate user answers for review state (Q1 wrong, Q2 wrong, Q3 correct)
 const initialAnswersState = {
-  1: "C", // Answered
+  1: "C", // Answered, Wrong (A is correct)
+  2: "C", // Answered, Wrong (B is correct) - Matches image highlight
+  3: "A", // Answered, Correct
+  // Simulate 32 correct, 18 wrong, 10 unanswered (out of 73 total)
+  ...Array.from({ length: 32 }, (_, i) => ({ [i + 4]: CORRECT_ANSWERS[i + 4] })),
+  ...Array.from({ length: 18 }, (_, i) => ({ [i + 36]: "D" })), // 18 wrong answers
 };
-const initialBookmarksState = {
-  16: true, // Bookmarked
-  55: true, // Bookmarked
-};
+const initialBookmarksState = { 55: true }; // Only Q55 bookmarked in review mode
 
 // --- Inline SVG Icons (Replacing Lucide) ---
 
@@ -82,6 +91,45 @@ const BookmarkIcon = ({ size = 18, fill = "none" }) => (
   </svg>
 );
 
+// Checkmark icon for correct answer in review mode
+const CheckmarkIcon = ({ size = 24, className = "text-success" }) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      style={{ minWidth: size }}
+    >
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+);
+
+// X icon for wrong answer in review mode
+const XIcon = ({ size = 24, className = "text-danger" }) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      style={{ minWidth: size }}
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+);
+
 
 // --- Custom Confirmation Modal Component (Bootstrap styling) ---
 const ConfirmationModal = ({ isOpen, title, message, onConfirm, onCancel }) => {
@@ -94,7 +142,6 @@ const ConfirmationModal = ({ isOpen, title, message, onConfirm, onCancel }) => {
         <div className="modal-content shadow-lg rounded-3">
           <div className="modal-header border-0 pb-0">
             <h5 className="modal-title fw-bold text-dark">{title}</h5>
-            {/* The standard Bootstrap close button uses the 'X' icon visually, but does not require the Lucide component */}
             <button type="button" className="btn-close" aria-label="Close" onClick={onCancel}></button>
           </div>
           <div className="modal-body pt-0">
@@ -125,15 +172,19 @@ const ConfirmationModal = ({ isOpen, title, message, onConfirm, onCancel }) => {
 
 // --- Main App Component ---
 export default function App() {
-  const [questions, setQuestions] = useState(initialQuestions);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(72); // Start at index 72 (Question 73 of 73)
-  const [answers, setAnswers] = useState(initialAnswersState);
+  const [questions] = useState(initialQuestions);
+  // Start at index 1 (Question 2) to match the review image
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(1); 
+  const [answers] = useState(initialAnswersState);
   const [bookmarks, setBookmarks] = useState(initialBookmarksState);
   const [timeLeft, setTimeLeft] = useState(EXAM_DURATION_SECONDS);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [submissionStatus, setSubmissionStatus] = useState(null); // 'success' or 'null'
+  const [submissionStatus, setSubmissionStatus] = useState(null); 
+  // Set to 'review' mode initially as requested by the task
+  const [mode, setMode] = useState('review'); 
 
-  // Current question data
+  // Derived states
+  const isReviewMode = mode === 'review';
   const currentQuestion = questions[currentQuestionIndex];
   const totalQuestions = questions.length;
   // Calculate currentPage based on 10 questions per page for pagination
@@ -142,18 +193,52 @@ export default function App() {
 
   // Load selected option from answers state
   const selectedOptionId = answers[currentQuestion.id] || null;
+  
+  // Scoring and Status Calculation
+  const { correctCount, answeredCount, wrongCount, totalAttempted } = useMemo(() => {
+    let correct = 0;
+    let answered = 0;
+    
+    // Count based on the questions that were answered
+    const answeredKeys = Object.keys(answers).map(Number);
+    
+    answeredKeys.forEach(qId => {
+        answered++;
+        if (answers[qId] === CORRECT_ANSWERS[qId]) {
+            correct++;
+        }
+    });
+
+    const wrong = answered - correct;
+    
+    return {
+        correctCount: correct,
+        answeredCount: answered,
+        wrongCount: wrong,
+        totalAttempted: answered, // Total questions attempted (answered)
+    };
+  }, [answers]);
+  
+  // Review Status Calculation (Matching the image's example numbers)
+  const totalReviewQuestions = 73; // Total questions in the exam
+  const reviewStats = {
+      all: totalReviewQuestions,
+      correct: correctCount,
+      wrong: wrongCount,
+  };
+  const scorePercentage = totalAttempted > 0 ? ((correctCount / totalAttempted) * 100).toFixed(0) : 0;
+  const scoreDisplay = `${correctCount} / ${totalAttempted}`;
 
 
-  // Timer Effect
+  // Timer Effect (Only run in 'exam' mode)
   useEffect(() => {
-    if (timeLeft <= 0) {
-      // Auto-submit logic here if needed
+    if (mode === 'review' || timeLeft <= 0) {
       return;
     }
 
     const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
     return () => clearTimeout(timerId);
-  }, [timeLeft]);
+  }, [timeLeft, mode]);
 
   const formatTime = (seconds) => {
     const hrs = Math.floor(seconds / 3600);
@@ -166,12 +251,7 @@ export default function App() {
 
   // --- Handlers ---
 
-  const handleOptionSelect = useCallback((optionId) => {
-    setAnswers((prevAnswers) => ({
-      ...prevAnswers,
-      [currentQuestion.id]: optionId,
-    }));
-  }, [currentQuestion.id]);
+  // Removed handleOptionSelect as answering is disabled in review mode
 
   const goToQuestion = useCallback((index) => {
     if (index >= 0 && index < totalQuestions) {
@@ -183,6 +263,7 @@ export default function App() {
   const goToPreviousQuestion = () => goToQuestion(currentQuestionIndex - 1);
 
   const toggleBookmark = useCallback(() => {
+    // Bookmarking is still allowed in review mode
     setBookmarks(prev => {
       const newBookmarks = { ...prev };
       if (newBookmarks[currentQuestion.id]) {
@@ -194,17 +275,16 @@ export default function App() {
     });
   }, [currentQuestion.id]);
 
-  const handleSubmit = () => {
-    setIsModalOpen(true);
+  const handleRetryExam = () => {
+      // Logic to reset state and go back to 'exam' mode
+      console.log("Retrying Exam...");
+      setMode('exam');
+      setCurrentQuestionIndex(0);
+      // Reset other states if required for a real retry
+      // setAnswers({});
+      // setBookmarks({});
   };
 
-  const confirmSubmission = () => {
-    setIsModalOpen(false);
-    setTimeLeft(0); // Stop the timer immediately
-    setSubmissionStatus('success');
-    // In a real app, this is where you'd send data to the server
-    console.log("Exam submitted:", answers);
-  };
 
   // --- UI Helpers ---
 
@@ -216,33 +296,45 @@ export default function App() {
 
     let baseClasses = "btn btn-sm text-center fw-semibold rounded-3 shadow-sm";
     let customStyle = {};
+    
+    const isCorrect = answers[qId] === CORRECT_ANSWERS[qId];
 
-    if (isCurrent) {
-      baseClasses += " btn-primary border-3 border-primary";
-      // Custom style to replicate the 'scale' and 'ring' effect
-      customStyle = { transform: 'scale(1.05)', boxShadow: '0 0 0 .25rem rgba(13, 110, 253, .5)' };
-    } else if (isAnswered) {
-      baseClasses += " btn-success"; // Green background for answered
+    if (isReviewMode) {
+        if (isCurrent) {
+            baseClasses += " btn-primary border-3 border-primary";
+            customStyle = { transform: 'scale(1.05)', boxShadow: '0 0 0 .25rem rgba(13, 110, 253, .5)' };
+        } else if (isAnswered) {
+            baseClasses = isCorrect ? "btn btn-sm text-white text-center fw-semibold rounded-3 shadow-sm btn-success" : "btn btn-sm text-white text-center fw-semibold rounded-3 shadow-sm btn-danger";
+        } else {
+            // Unanswered questions in review mode are gray/light
+            baseClasses += " btn-outline-secondary";
+        }
     } else {
-      baseClasses += " btn-outline-secondary";
+        // Exam Mode Logic (Original)
+        if (isCurrent) {
+            baseClasses += " btn-primary border-3 border-primary";
+            customStyle = { transform: 'scale(1.05)', boxShadow: '0 0 0 .25rem rgba(13, 110, 253, .5)' };
+        } else if (isAnswered) {
+            baseClasses += " btn-success";
+        } else {
+            baseClasses += " btn-outline-secondary";
+        }
     }
 
-    if (isBookmarked) {
+
+    if (isBookmarked && !isCurrent) {
       // Replicate the orange border using custom style
       customStyle = { ...customStyle, border: '3px solid #fd7e14' }; // Orange color
-      // If answered and bookmarked, use the success color but add orange border
-      if (isAnswered && !isCurrent) {
-          baseClasses = "btn btn-sm text-white text-center fw-semibold rounded-3 shadow-sm btn-success";
-      } else if (!isCurrent && !isAnswered) {
-          // If not answered/current, just outline but with orange border
-          baseClasses = "btn btn-sm text-dark text-center fw-semibold rounded-3 shadow-sm btn-light";
+      // Ensure text is readable if color is light
+      if (!isAnswered || isCurrent) {
+          baseClasses = baseClasses.replace('text-dark', 'text-dark').replace('btn-light', 'btn-light');
       }
     }
 
     return { baseClasses, customStyle };
-  }, [currentQuestionIndex, answers, bookmarks]);
+  }, [currentQuestionIndex, answers, bookmarks, isReviewMode]);
 
-  // Pagination for the bottom navigation bar
+  // Pagination for the bottom navigation bar (Logic remains the same)
   const paginationRange = useMemo(() => {
     const range = [];
     let start = Math.max(1, currentPage - 1);
@@ -265,6 +357,70 @@ export default function App() {
     return range;
   }, [currentPage, totalPages]);
 
+
+  // --- Option Rendering Logic for Review Mode ---
+  const renderOption = (option) => {
+    const isCorrectAnswer = option.id === CORRECT_ANSWERS[currentQuestion.id];
+    const isUserSelection = option.id === selectedOptionId;
+    
+    let optionClasses = "form-check d-flex align-items-center p-3 rounded-3 border shadow-sm";
+    let icon = null;
+
+    if (isReviewMode) {
+      if (isCorrectAnswer) {
+        // Correct answer gets green highlight
+        optionClasses += " bg-success-subtle border-success";
+        icon = <CheckmarkIcon size={20} className="text-success" />;
+      } else if (isUserSelection) {
+        // User's wrong answer gets red highlight
+        optionClasses += " bg-danger-subtle border-danger";
+        icon = <XIcon size={20} className="text-danger" />;
+      } else {
+        // Other options are light gray
+        optionClasses += " bg-white border-secondary-subtle";
+      }
+    } else {
+        // Exam Mode Logic (Original)
+        if (isUserSelection) {
+            optionClasses += " bg-light border-primary";
+        } else {
+            optionClasses += " bg-white border-secondary-subtle hover-bg-light";
+        }
+    }
+    
+    return (
+        <label
+          key={option.id}
+          className={`${optionClasses} cursor-pointer`}
+          style={{ paddingLeft: '3rem' }} // Adjust for radio button placement
+        >
+            {/* The radio input is disabled in review mode */}
+            <input
+                type="radio"
+                name={`q-${currentQuestion.id}`}
+                value={option.id}
+                checked={isUserSelection || isCorrectAnswer} // Checked visually if it was selected or is correct
+                onChange={() => { /* Disabled in review mode */ }}
+                className={`form-check-input me-3 ${isReviewMode ? 'd-none' : ''}`} // Hide native radio in review
+                style={{ marginLeft: '-1.5rem' }}
+                disabled={isReviewMode}
+            />
+            
+            {/* Custom Icon/Indicator */}
+            {isReviewMode && (
+                <div className="me-3" style={{ width: '24px', height: '24px', marginLeft: '-1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {icon}
+                </div>
+            )}
+
+            <span className="text-dark fw-medium">
+                <strong className="me-2">{option.id}.</strong> {option.text}
+            </span>
+        </label>
+    );
+  };
+
+
   // --- Render ---
 
   if (submissionStatus === 'success') {
@@ -284,23 +440,38 @@ export default function App() {
 
   return (
     <div className="d-flex flex-column min-vh-100 bg-light">
-      {/* Bootstrap requires a link to its CSS library for proper rendering, but in a single file React app with assumed Tailwind support, we rely on the utility classes and built-in Bootstrap structure (which is styled via those classes). For this example, we'll assume a Bootstrap environment is set up. */}
 
       {/* 1. Header (Fixed Top) */}
       <header className="bg-white shadow-sm p-3 sticky-top" style={{ zIndex: 10 }}>
         <div className="d-flex justify-content-between align-items-center container-fluid">
           <div className="d-flex align-items-center">
-            {/* Replaced Lucide ChevronLeft with inline SVG */}
             <ChevronLeftIcon className="text-secondary me-3" size={24} />
             <h1 className="h5 fw-semibold text-dark my-0">
-              Exam - Project Management Fundamentals
+              {isReviewMode ? "Review Answers" : "Exam - Project Management Fundamentals"}
             </h1>
+            {isReviewMode && (
+                <div className="ms-4 d-flex align-items-center">
+                    <span className="text-secondary text-uppercase fw-semibold small me-2">Score:</span>
+                    <span className="fw-bold me-2 text-dark">{scoreDisplay}</span>
+                    <div className="progress" style={{ width: '100px', height: '8px' }}>
+                        <div 
+                            className="progress-bar bg-success" 
+                            role="progressbar" 
+                            style={{ width: `${scorePercentage}%` }} 
+                            aria-valuenow={scorePercentage} 
+                            aria-valuemin="0" 
+                            aria-valuemax="100">
+                        </div>
+                    </div>
+                    <span className="fw-bold ms-2 text-success small">{scorePercentage}%</span>
+                </div>
+            )}
           </div>
           <button
-            onClick={handleSubmit}
-            className="btn btn-success fw-medium shadow-sm"
+            onClick={isReviewMode ? handleRetryExam : () => setSubmissionStatus('success') /* simplified submit for this demo */}
+            className={`btn fw-medium shadow-sm ${isReviewMode ? 'btn-warning text-dark' : 'btn-success'}`}
           >
-            Submit Exam
+            {isReviewMode ? "Retry Exam" : "Submit Exam"}
           </button>
         </div>
       </header>
@@ -309,7 +480,6 @@ export default function App() {
       <div className="d-flex flex-grow-1 p-4 container-fluid">
         
         {/* Left Column: Question Area (approx 70% on large screens) */}
-        {/* Added dynamic width handling for responsiveness (d-lg-75 for desktop) */}
         <div className="d-flex flex-column w-100 w-lg-75 me-lg-4">
 
           <div className="card rounded-3 shadow-lg p-4 p-lg-5 flex-grow-1">
@@ -317,19 +487,18 @@ export default function App() {
             {/* Question Header */}
             <div className="d-flex justify-content-between align-items-center pb-3 border-bottom border-light mb-4">
               <h2 className="h4 fw-bold text-dark my-0">
-                Question {currentQuestion.id} of {totalQuestions}
+                Question {currentQuestion.id} of {totalAttempted}
               </h2>
               <button
                 onClick={toggleBookmark}
                 className={`btn btn-sm ${
                   bookmarks[currentQuestion.id]
-                    ? "btn-warning text-dark border-2" // Use warning for orange effect
+                    ? "btn-warning text-dark border-2" 
                     : "btn-outline-secondary"
                 } p-2 rounded-circle`}
                 title="Bookmark Question"
                 style={{ aspectRatio: 1, height: '38px', borderColor: bookmarks[currentQuestion.id] ? '#fd7e14' : undefined }}
               >
-                {/* Replaced Lucide Bookmark with inline SVG */}
                 <BookmarkIcon size={18} fill={bookmarks[currentQuestion.id] ? "currentColor" : "none"} />
               </button>
             </div>
@@ -341,39 +510,16 @@ export default function App() {
                   {currentQuestion.id}. {currentQuestion.question}
                 </p>
 
-                {/* Options */}
+                {/* Options (Uses the modified renderOption function) */}
                 <div className="d-flex flex-column gap-3">
-                  {currentQuestion.options.map((option) => (
-                    <label
-                      key={option.id}
-                      className={`form-check d-flex align-items-center p-3 rounded-3 border shadow-sm cursor-pointer ${
-                        selectedOptionId === option.id
-                          ? "bg-light border-primary"
-                          : "bg-white border-secondary-subtle hover-bg-light"
-                      }`}
-                      style={{ paddingLeft: '3rem' }} // Adjust for radio button placement
-                    >
-                      <input
-                        type="radio"
-                        name={`q-${currentQuestion.id}`}
-                        value={option.id}
-                        checked={selectedOptionId === option.id}
-                        onChange={() => handleOptionSelect(option.id)}
-                        className="form-check-input me-3"
-                        style={{ marginLeft: '-1.5rem' }}
-                      />
-                      <span className="text-dark fw-medium">
-                        <strong className="me-2">{option.id}.</strong> {option.text}
-                      </span>
-                    </label>
-                  ))}
+                  {currentQuestion.options.map(renderOption)}
                 </div>
               </div>
 
               {/* Illustration Image */}
               <div className="d-none d-lg-block ms-4" style={{ width: '250px', flexShrink: 0 }}>
                 <img
-                  src="https://placehold.co/400x400/0d6efd/ffffff?text=Project+Management+Exam"
+                  src="https://placehold.co/400x400/5832a8/ffffff?text=Project+Management+Review"
                   alt="Project Management Concept"
                   className="img-fluid rounded-3 shadow-sm"
                   onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/400x400/20c997/ffffff?text=Illustration+Fallback"; }}
@@ -386,12 +532,12 @@ export default function App() {
         {/* Right Column: Timer and Navigation (approx 30%) - Hidden on small screens */}
         <div className="d-none d-lg-block w-25">
           
-          {/* Time Left Box */}
+          {/* Time Left Box - Fixed at 00:00:00 for review mode */}
           <div className="card rounded-3 shadow-sm p-3 mb-4">
             <div className="d-flex justify-content-between align-items-center">
                 <span className="text-secondary text-uppercase fw-semibold small">Time Left</span>
-                <span className={`fs-4 fw-bold ${timeLeft < 300 ? 'text-danger' : 'text-dark'}`}>
-                    {formatTime(timeLeft)}
+                <span className="fs-4 fw-bold text-dark">
+                    {isReviewMode ? "00:00:00" : formatTime(timeLeft)}
                 </span>
             </div>
           </div>
@@ -401,10 +547,13 @@ export default function App() {
             <h3 className="h6 fw-bold text-dark mb-3">Question Status</h3>
             <div className="d-flex flex-wrap gap-3 small fw-medium mb-3">
               <span className="text-primary d-flex align-items-center">
-                All <span className="ms-1 badge bg-primary-subtle text-primary rounded-pill">{totalQuestions}</span>
+                All <span className="ms-1 badge bg-primary-subtle text-primary rounded-pill">{reviewStats.all}</span>
               </span>
               <span className="text-success d-flex align-items-center">
-                Answered <span className="ms-1 badge bg-success-subtle text-success rounded-pill">{Object.keys(answers).length}</span>
+                Correct <span className="ms-1 badge bg-success-subtle text-success rounded-pill">{reviewStats.correct}</span>
+              </span>
+              <span className="text-danger d-flex align-items-center">
+                Wrong <span className="ms-1 badge bg-danger-subtle text-danger rounded-pill">{reviewStats.wrong}</span>
               </span>
               <span className="text-warning d-flex align-items-center">
                 Bookmarked <span className="ms-1 badge bg-warning-subtle text-warning rounded-pill">{Object.keys(bookmarks).length}</span>
@@ -443,7 +592,6 @@ export default function App() {
             disabled={currentQuestionIndex === 0}
             className="btn btn-outline-secondary fw-medium"
           >
-            {/* Replaced Lucide ChevronLeft with inline SVG */}
             <ChevronLeftIcon size={18} className="me-1 text-secondary" />
             Previous
           </button>
@@ -451,7 +599,7 @@ export default function App() {
           {/* Page/Question Indicator */}
           <div className="d-flex align-items-center gap-4">
               <span className="fw-semibold text-dark">
-                  {currentQuestionIndex + 1}/{totalQuestions}
+                  {currentQuestionIndex + 1}/{totalAttempted}
               </span>
               {/* Small Pagination for Question Pages */}
               <div className="d-flex align-items-center gap-2 small">
@@ -461,7 +609,6 @@ export default function App() {
                       disabled={currentPage === 1}
                       className="btn btn-light btn-sm p-1 rounded-circle"
                   >
-                      {/* Replaced Lucide ChevronLeft with inline SVG */}
                       <ChevronLeftIcon size={16} className="text-dark" />
                   </button>
                   {/* Page Numbers */}
@@ -485,7 +632,6 @@ export default function App() {
                       disabled={currentPage === totalPages}
                       className="btn btn-light btn-sm p-1 rounded-circle"
                   >
-                      {/* Replaced Lucide ChevronRight with inline SVG */}
                       <ChevronRightIcon size={16} className="text-dark" />
                   </button>
               </div>
@@ -498,18 +644,17 @@ export default function App() {
             className="btn btn-primary fw-medium shadow-sm"
           >
             Next Question
-            {/* Replaced Lucide ChevronRight with inline SVG */}
             <ChevronRightIcon size={18} className="ms-1 text-white" />
           </button>
         </div>
       </footer>
 
-      {/* Confirmation Dialog */}
+      {/* Confirmation Dialog (Not relevant in review mode, but kept for completeness) */}
       <ConfirmationModal
         isOpen={isModalOpen}
         title="Konfirmasi Pengumpulan Ujian"
         message="Anda yakin ingin mengakhiri sesi ujian dan mengumpulkan jawaban Anda? Setelah dikumpulkan, Anda tidak dapat mengubah jawaban lagi."
-        onConfirm={confirmSubmission}
+        onConfirm={() => setIsModalOpen(false)}
         onCancel={() => setIsModalOpen(false)}
       />
     </div>

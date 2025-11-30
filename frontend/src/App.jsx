@@ -25,6 +25,12 @@ import UserDashboard from './pages/Dashboard/UserDashboard/LayoutUserDashboard.j
 // user profile
 import UserProfile from './pages/Profile/LayoutUser.jsx'
 
+// Exam page
+import Exam1 from './pages/Exam/Exam1.jsx'
+import ExamDetailsPage from './pages/Exam/ExamDetailsPage.jsx'
+import ExamSessionPage from './pages/Exam/ExamSessionPage.jsx'
+import ExamReviewPage from './pages/Exam/ExamReviewPage.jsx'
+
 export default function App() {
   return (
     <div className="">
@@ -54,6 +60,12 @@ export default function App() {
 
         {/* user profile */}
         <Route path='/User-Profile' element={<UserProfile />} />
+
+        {/* exam pages */}
+        <Route path="/Exam1" element={<Exam1 />} />
+        <Route path="/ExamDetailsPage" element={<ExamDetailsPage />} />
+        <Route path="/ExamSessionPage" element={<ExamSessionPage />} />
+        <Route path="/ExamReviewPage" element={<ExamReviewPage />} />
 
       </Routes>
     </div>
