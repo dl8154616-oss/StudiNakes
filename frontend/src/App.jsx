@@ -30,6 +30,7 @@ import Exam1 from './pages/Exam/Exam1.jsx'
 import ExamDetailsPage from './pages/Exam/ExamDetailsPage.jsx'
 import ExamSessionPage from './pages/Exam/ExamSessionPage.jsx'
 import ExamReviewPage from './pages/Exam/ExamReviewPage.jsx'
+import ExamResultPage from './pages/Exam/ExamResultPage.jsx'
 
 export default function App() {
   return (
@@ -66,6 +67,7 @@ export default function App() {
         <Route path="/ExamDetailsPage" element={<ExamDetailsPage />} />
         <Route path="/ExamSessionPage" element={<ExamSessionPage />} />
         <Route path="/ExamReviewPage" element={<ExamReviewPage />} />
+        <Route path="/ExamResultPage" element={<ExamResultPage />} />
 
       </Routes>
     </div>

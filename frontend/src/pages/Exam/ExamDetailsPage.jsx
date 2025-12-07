@@ -48,6 +48,15 @@ export default function ExamDetailsPage() {
       originalPrice: "2,000.00",
       sales: 15,
     },
+    {
+      id: 6,
+      title: "Project Management Professional",
+      imgUrl: "/images/Exam/pmp.png",
+      discount: "20%",
+      discountPrice: "1,600.00",
+      originalPrice: "2,000.00",
+      sales: 15,
+    },
   ];
 
   return (
